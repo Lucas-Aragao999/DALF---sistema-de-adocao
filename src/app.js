@@ -1,36 +1,55 @@
 const express = require ('express');
 const app = express();
+const uuid = require ('uuidv4')
 
-app.post('/animais', (request, responde) => {
+app.post('/animais', (request, response) => {
+    const { nome, especie, porte, castrado, vacinado, descricao, foto, adotado, createAt } = request.body
+
+    const animais = {
+        id,
+        nome,
+        especie,
+        porte,
+        castrado,
+        vacinado,
+        descricao,
+        foto,
+        adotado,
+        createAt,
+    };
+
+    const id = uuidv4();
+
+})
+
     
-})
 
-app.post('/tutores', (request, responde) => {
-
-})
-
-app.get('/animais', (request, responde) => {
+app.post('/tutores', (request, response) => {
 
 })
 
-app.patch('/tutores:id', (request, responde) => {
+app.get('/animais', (request, response) => {
 
 })
 
-app.get('/tutores:id', (request, responde) => {
-
-})
-app.post('/questionario', (request, responde) => {
-
-})
-app.post('/adocoes', (request, responde) => {
-
-})
-app.get('/admin/animais', (request, responde) => {
+app.patch('/tutores:id', (request, response) => {
 
 })
 
-app.patch('/admin/animais:id', (request, responde) => {
+app.get('/tutores:id', (request, response) => {
+
+})
+app.post('/questionario', (request, response) => {
+
+})
+app.post('/adocoes', (request, response) => {
+
+})
+app.get('/admin/animais', (request, response) => {
+
+})
+
+app.patch('/admin/animais:id', (request, response) => {
 
 })
 
