@@ -27,7 +27,21 @@ app.post('/animais', (request, response) => {
     
 
 app.post('/tutores', (request, response) => {
-
+    const { nome_completo, senha, email, cidade, estado, idade, telefone, instagram, facebook } = request.body
+    
+    const tutores = {
+            id,
+            nome_completo,
+            senha,
+            email,
+            cidade,
+            estado,
+            idade,
+            telefone,
+            instagram,
+            facebook
+    }
+    const id = uuidv4();
 })
 
 app.get('/animais', (request, response) => {
