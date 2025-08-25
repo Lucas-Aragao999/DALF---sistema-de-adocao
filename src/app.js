@@ -1,12 +1,12 @@
 const express = require ('express');
 const app = express();
 const uuid = require ('uuidv4')
+const port = 3333
 
 app.post('/animais', (request, response) => {
     const { nome, especie, porte, castrado, vacinado, descricao, foto, adotado, createAt } = request.body
 
     const animais = {
-        id,
         nome,
         especie,
         porte,
@@ -18,7 +18,9 @@ app.post('/animais', (request, response) => {
         createAt,
     };
 
-    const id = uuidv4();
+    response.json({ message: "Hello, world"})
+
+    
 
 })
 
@@ -29,6 +31,7 @@ app.post('/tutores', (request, response) => {
 })
 
 app.get('/animais', (request, response) => {
+    response.json({ message : "Hello, World!!!"})
 
 })
 
@@ -67,4 +70,8 @@ app.post('/login', (request, response) => {
 
 app.post('doacoes', (request, response) => {
 
+})
+
+app.listen(3333, () => {
+    console.log(`🚀 servidor rodando na port ${port} `)
 })
