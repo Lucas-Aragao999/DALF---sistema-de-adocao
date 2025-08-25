@@ -1,7 +1,7 @@
 const express = require('express')
 const { v4: uuid } = require('uuid') // importa corretamente o uuid
 const app = express()
-const port = 3333
+const port = 3333;
 
 // aprendam sobre Middleware, é mtoo importante
 app.use(express.json())
