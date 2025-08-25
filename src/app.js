@@ -43,9 +43,12 @@ app.get('/animais/:id', (request, response) => {
     const { id } = request.params
     return response.json({ message: `Detalhes do animal ${id}` }) //to usando crase por gosto pessoal mesmo
 })
+app.patch('/tutores/:id', (request, response) => {
+
+})
 
 // Rotas de tutores
-app.post('/tutores', (request, response) => {
+app.post('/tutores/', (request, response) => {
     return response.json({ message: 'Tutor cadastrado!' })
 })
 app.post('/questionario', (request, response) => {
