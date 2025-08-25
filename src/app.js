@@ -1,12 +1,17 @@
-const express = require ('express');
-const app = express();
-const uuid = require ('uuidv4')
+const express = require('express')
+const { v4: uuid } = require('uuid') // importa corretamente o uuid
+const app = express()
 const port = 3333
+
+// aprendam sobre Middleware, é mtoo importante
+app.use(express.json())
+//NUNCAA ESQUE DO RETURN
 
 app.post('/animais', (request, response) => {
     const { nome, especie, porte, castrado, vacinado, descricao, foto, adotado, createAt } = request.body
 
-    const animais = {
+    const animal = {
+        id: uuid(),
         nome,
         especie,
         porte,
@@ -15,77 +20,77 @@ app.post('/animais', (request, response) => {
         descricao,
         foto,
         adotado,
-        createAt,
-    };
-
-    response.json({ message: "Hello, world"})
-
-    
-
-})
-
-    
-
-app.post('/tutores', (request, response) => {
-    const { nome_completo, senha, email, cidade, estado, idade, telefone, instagram, facebook } = request.body
-    
-    const tutores = {
-            id,
-            nome_completo,
-            senha,
-            email,
-            cidade,
-            estado,
-            idade,
-            telefone,
-            instagram,
-            facebook
+        createAt
     }
-    const id = uuidv4();
+
+    return response.status(201).json(animal)
 })
 
 app.get('/animais', (request, response) => {
-    response.json({ message : "Hello, World!!!"})
+    const { nome, especie } = request.query
 
+    console.log('Nome:', nome)
+    console.log('Espécie:', especie)
+
+    return response.status(200).json([
+        'Animal 1',
+        'Animal 2'
+    ])
 })
 
-app.patch('/tutores:id', (request, response) => {
-
+app.get('/animais/:id', (request, response) => {
+    const { id } = request.params
+    return response.json({ message: `Detalhes do animal ${id}` }) //to usando crase por gosto pessoal mesmo
 })
 
-app.get('/tutores:id', (request, response) => {
-
+// Rotas de tutores
+app.post('/tutores', (request, response) => {
+    return response.json({ message: 'Tutor cadastrado!' })
 })
-app.post('/questionario', (request, response) => {
 
+app.get('/tutores/:id', (request, response) => {
+    const { id } = request.params
+    return response.json({ message: `Tutor ${id}` })
 })
-app.post('/adocoes', (request, response) => {
 
+app.patch('/tutores/:id', (request, response) => {
+    const { id } = request.params
+    return response.json({ message: `Tutor ${id} atualizado!` })
 })
+
+// Rotas de admin (animais)
 app.get('/admin/animais', (request, response) => {
-
+    return response.json(['Animal admin 1', 'Animal admin 2'])
 })
 
-app.patch('/admin/animais:id', (request, response) => {
-
+app.patch('/admin/animais/:id', (request, response) => {
+    const { id } = request.params
+    return response.json({ message: `Animal ${id} atualizado pelo admin!` })
 })
 
-app.delete('/admin/animais:id', (request, response) => {
-
+app.delete('/admin/animais/:id', (request, response) => {
+    const { id } = request.params
+    return response.json({ message: `Animal ${id} deletado pelo admin!` })
 })
 
-app.get('/animais:id', (request, response) => {
+// Outras rotas
+app.post('/questionario', (request, response) => {
+    return response.json({ message: 'Questionário recebido!' })
+})
 
+app.post('/adocoes', (request, response) => {
+    return response.json({ message: 'Adoção registrada!' })
 })
 
 app.post('/login', (request, response) => {
-
-})      
-
-app.post('doacoes', (request, response) => {
-
+    return response.json({ message: 'Login realizado!' })
 })
 
-app.listen(3333, () => {
-    console.log(`🚀 servidor rodando na port ${port} `)
+app.post('/doacoes', (request, response) => {
+    return response.json({ message: 'Doação registrada!' })
+})
+
+// Inicializa servidor
+app.listen(port, () => {
+    console.log(`🚀 Servidor rodando na porta ${port}`)
 })
