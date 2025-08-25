@@ -52,11 +52,11 @@ app.get('/animais', (request, response) => {
     return response.json(responseData);
 })
 
-app.patch('/tutores:id', (request, response) => {
+app.patch('/tutores/:id', (request, response) => {
 
 })
 
-app.get('/tutores:id', (request, response) => {
+app.get('/tutores/:id', (request, response) => {
 
 })
 app.post('/questionario', (request, response) => {
@@ -133,19 +133,28 @@ app.get('/admin/animais', (request, response) => {
 
 })
 
-app.patch('/admin/animais:id', (request, response) => {
+app.patch('/admin/animais/:id', (request, response) => {
 
 })
 
-app.delete('/admin/animais:id', (request, response) => {
+app.delete('/admin/animais/:id', (request, response) => {
 
 })
 
-app.get('/animais:id', (request, response) => {
+app.get('/animais/:id', (request, response) => {
 
 })
 
-app.post('/login', (request, response) => {
+app.post('/autenticacao', (request, response) => {
+    const { email, senha } = request.body
+
+    const autenticacao = {
+        id,
+        email,
+        senha
+    }
+
+    const id = uuidv4();
 
 })      
 
