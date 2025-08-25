@@ -32,10 +32,11 @@ app.get('/animais', (request, response) => {
     console.log('Nome:', nome)
     console.log('Espécie:', especie)
 
-    return response.status(200).json([
-        'Animal 1',
-        'Animal 2'
-    ])
+    const responseData = {
+        data: animais,
+        total: animais.length
+    };
+    return response.json(responseData);
 })
 
 app.get('/animais/:id', (request, response) => {
@@ -47,6 +48,9 @@ app.get('/animais/:id', (request, response) => {
 app.post('/tutores', (request, response) => {
     return response.json({ message: 'Tutor cadastrado!' })
 })
+app.post('/questionario', (request, response) => {
+
+    })
 
 app.get('/tutores/:id', (request, response) => {
     const { id } = request.params
@@ -90,7 +94,6 @@ app.post('/doacoes', (request, response) => {
     return response.json({ message: 'Doação registrada!' })
 })
 
-// Inicializa servidor
-app.listen(port, () => {
-    console.log(`🚀 Servidor rodando na porta ${port}`)
+app.listen(3333, () => {
+    console.log(`🚀 servidor rodando na port ${port}`)
 })
