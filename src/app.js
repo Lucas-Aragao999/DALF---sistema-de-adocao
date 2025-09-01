@@ -1,14 +1,18 @@
 const express = require('express')
-const { v4: uuid } = require('uuid') // importa corretamente o uuid
+const { v4: uuid } = require('uuid') 
 const app = express()
 const port = 3333
 
-// aprendam sobre Middleware, é mtoo importante
 app.use(express.json())
-//NUNCAA ESQUE DO RETURN
 
-app.post('/animais', (request, response) => {
-    const { nome, especie, porte, castrado, vacinado, descricao, foto, adotado, createAt } = request.body
+let animais = []
+let tutores = []
+let questionarios = []
+let adocoes = []
+let doacoes = []
+
+app.post('/animais', (req, res) => {
+    const { nome, especie, porte, castrado, vacinado, descricao, foto, adotado } = req.body
 
     const animal = {
         id: uuid(),
@@ -19,148 +23,147 @@ app.post('/animais', (request, response) => {
         vacinado,
         descricao,
         foto,
-        adotado,
-        createAt
+        adotado: adotado || false,
+        createdAt: new Date(),
+        updatedAt: new Date()
     }
 
-    return response.status(201).json(animal)
+    animais.push(animal)
+    return res.status(201).json(animal)
 })
 
-app.get('/animais', (request, response) => {
-    const { nome, especie } = request.query
+app.get('/animais', (req, res) => {
+    const { nome, especie } = req.query
+    let resultados = animais
 
-    console.log('Nome:', nome)
-    console.log('Espécie:', especie)
+    if (nome) resultados = resultados.filter(a => a.nome.toLowerCase().includes(nome.toLowerCase()))
+    if (especie) resultados = resultados.filter(a => a.especie.toLowerCase() === especie.toLowerCase())
 
-    const responseData = {
-        data: animais,
-        total: animais.length
-    };
-    return response.json(responseData);
+    return res.json({ data: resultados, total: resultados.length })
 })
 
-app.get('/animais/:id', (request, response) => {
-    const { id } = request.params
-    return response.json({ message: `Detalhes do animal ${id}` }) //to usando crase por gosto pessoal mesmo
-})
-app.patch('/tutores/:id', (request, response) => {
-
-})
-
-// Rotas de tutores
-app.post('/tutores/', (request, response) => {
-    return response.json({ message: 'Tutor cadastrado!' })
-})
-app.post('/questionario', (request, response) => {
-    const { tutorId, empregado, quantos_animais_possui, motivos_para_adotar, quem_vai_sustentar_o_animal, 
-        numero_adultos_na_casa, numero_criancas_na_casa, idades_criancas, residencia_tipo, 
-        proprietario_permite_animaistodos_de_acordo_com_adocao, responsavel_pelo_animal, 
-        responsavel_concorda_com_adocao, ha_alergico_ou_pessoas_que_nao_gostam, 
-        gasto_mensal_estimado, valor_disponivel_no_orcamento, tipo_alimentacao, 
-        local_que_o_animal_vai_ficar, forma_de_permanencia, forma_de_confinamento, 
-        tera_brinquedos, tera_abrigo, tera_passeios_acompanhado, tera_passeios_sozinho, 
-        companhia_outro_animal, companhia_humana_24h, companhia_humana_parcial, sem_companhia_humana,
-        sem_companhia_animal, o_que_faz_em_viagem, o_que_faz_se_fugir, o_que_faz_se_nao_puder_criar,
-        animais_que_ja_criou, destino_animais_anteriores, costuma_esterilizar, costuma_vacinar, 
-        costuma_vermifugar, veterinario_usual, forma_de_educar, envia_fotos_e_videos_do_local, 
-        aceita_visitas_e_fotos_do_animal, topa_entrar_grupo_adotantes, concorda_com_taxa_adocao, 
-        data_disponivel_para_buscar_animal, createdAt, updatedAt } = request.body
-
-        const questionario = {
-            id, 
-            tutorId, 
-            empregado, 
-            quantos_animais_possui, 
-            motivos_para_adotar, 
-            quem_vai_sustentar_o_animal, 
-            numero_adultos_na_casa, 
-            numero_criancas_na_casa, 
-            idades_criancas, 
-            residencia_tipo, 
-            proprietario_permite_animaistodos_de_acordo_com_adocao, 
-            responsavel_pelo_animal, 
-            responsavel_concorda_com_adocao, 
-            ha_alergico_ou_pessoas_que_nao_gostam, 
-            gasto_mensal_estimado, 
-            valor_disponivel_no_orcamento, 
-            tipo_alimentacao, 
-            local_que_o_animal_vai_ficar, 
-            forma_de_permanencia, 
-            forma_de_confinamento, 
-            tera_brinquedos, 
-            tera_abrigo, 
-            tera_passeios_acompanhado, 
-            tera_passeios_sozinho, 
-            companhia_outro_animal, 
-            companhia_humana_24h, 
-            companhia_humana_parcial, 
-            sem_companhia_humana,
-            sem_companhia_animal, 
-            o_que_faz_em_viagem, 
-            o_que_faz_se_fugir, 
-            o_que_faz_se_nao_puder_criar,
-            animais_que_ja_criou, 
-            destino_animais_anteriores, 
-            costuma_esterilizar, 
-            costuma_vacinar, 
-            costuma_vermifugar, 
-            veterinario_usual, 
-            forma_de_educar, 
-            envia_fotos_e_videos_do_local, 
-            aceita_visitas_e_fotos_do_animal, 
-            topa_entrar_grupo_adotantes, 
-            concorda_com_taxa_adocao, 
-            data_disponivel_para_buscar_animal, 
-            createdAt, 
-            updatedAt
-        }
-
-        const id = uuidv4();
-
+app.get('/animais/:id', (req, res) => {
+    const { id } = req.params
+    const animal = animais.find(a => a.id === id)
+    if (!animal) return res.status(404).json({ error: 'Animal não encontrado' })
+    return res.json(animal)
 })
 
-app.get('/tutores/:id', (request, response) => {
-    const { id } = request.params
-    return response.json({ message: `Tutor ${id}` })
+app.post('/tutores', (req, res) => {
+    const { nome_completo, senha, email, cidade, estado, idade, telefone, instagram, facebook } = req.body
+
+    const tutor = {
+        id: uuid(),
+        nome_completo,
+        senha, 
+        email,
+        cidade,
+        estado,
+        idade,
+        telefone,
+        instagram,
+        facebook,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+
+    tutores.push(tutor)
+    return res.status(201).json(tutor)
 })
 
-app.patch('/tutores/:id', (request, response) => {
-    const { id } = request.params
-    return response.json({ message: `Tutor ${id} atualizado!` })
+app.get('/tutores/:id', (req, res) => {
+    const { id } = req.params
+    const tutor = tutores.find(t => t.id === id)
+    if (!tutor) return res.status(404).json({ error: 'Tutor não encontrado' })
+    return res.json(tutor)
 })
 
-// Rotas de admin (animais)
-app.get('/admin/animais', (request, response) => {
-    return response.json(['Animal admin 1', 'Animal admin 2'])
+app.patch('/tutores/:id', (req, res) => {
+    const { id } = req.params
+    const tutor = tutores.find(t => t.id === id)
+    if (!tutor) return res.status(404).json({ error: 'Tutor não encontrado' })
+
+    Object.assign(tutor, req.body, { updatedAt: new Date() })
+    return res.json({ message: `Tutor ${id} atualizado!`, tutor })
 })
 
-app.patch('/admin/animais/:id', (request, response) => {
-    const { id } = request.params
-    return response.json({ message: `Animal ${id} atualizado pelo admin!` })
+app.post('/questionario', (req, res) => {
+    const id = uuid()
+    const questionario = { id, ...req.body, createdAt: new Date(), updatedAt: new Date() }
+
+    questionarios.push(questionario)
+    return res.status(201).json(questionario)
 })
 
-app.delete('/admin/animais/:id', (request, response) => {
-    const { id } = request.params
-    return response.json({ message: `Animal ${id} deletado pelo admin!` })
+app.get('/questionario/:id', (req, res) => {
+    const { id } = req.params
+    const q = questionarios.find(q => q.id === id)
+    if (!q) return res.status(404).json({ error: 'Questionário não encontrado' })
+    return res.json(q)
 })
 
-// Outras rotas
-app.post('/questionario', (request, response) => {
-    return response.json({ message: 'Questionário recebido!' })
+app.post('/adocoes', (req, res) => {
+    const { tutor_id, animal_id, status, posicao_fila } = req.body
+
+    const adocao = {
+        id: uuid(),
+        tutor_id,
+        animal_id,
+        status: status || "em_analise",
+        posicao_fila: posicao_fila || 1,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+
+    adocoes.push(adocao)
+    return res.status(201).json(adocao)
 })
 
-app.post('/adocoes', (request, response) => {
-    return response.json({ message: 'Adoção registrada!' })
+app.post('/doacoes', (req, res) => {
+    const { nome, email, valor, mensagem, linkPix, qrcode } = req.body
+
+    const doacao = {
+        doacao_id: uuid(),
+        nome,
+        email,
+        valor,
+        mensagem,
+        linkPix,
+        qrcode,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+
+    doacoes.push(doacao)
+    return res.status(201).json(doacao)
 })
 
-app.post('/login', (request, response) => {
-    return response.json({ message: 'Login realizado!' })
+app.get('/admin/animais', (req, res) => {
+    return res.json(animais)
 })
 
-app.post('/doacoes', (request, response) => {
-    return response.json({ message: 'Doação registrada!' })
+app.patch('/admin/animais/:id', (req, res) => {
+    const { id } = req.params
+    const animal = animais.find(a => a.id === id)
+    if (!animal) return res.status(404).json({ error: 'Animal não encontrado' })
+
+    Object.assign(animal, req.body, { updatedAt: new Date() })
+    return res.json({ message: `Animal ${id} atualizado pelo admin!`, animal })
 })
 
-app.listen(3333, () => {
-    console.log(`🚀 servidor rodando na port ${port}`)
+app.delete('/admin/animais/:id', (req, res) => {
+    const { id } = req.params
+    animais = animais.filter(a => a.id !== id)
+    return res.json({ message: `Animal ${id} deletado pelo admin!` })
+})
+
+app.post('/login', (req, res) => {
+    const { email, senha } = req.body
+    const tutor = tutores.find(t => t.email === email && t.senha === senha)
+    if (!tutor) return res.status(401).json({ error: 'Credenciais inválidas' })
+    return res.json({ message: 'Login realizado!', tutor })
+})
+
+app.listen(port, () => {
+    console.log(`🚀 Servidor rodando na porta ${port}`)
 })
