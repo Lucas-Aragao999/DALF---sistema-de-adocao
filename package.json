@@ -11,7 +11,6 @@
     "url": "git+https://github.com/Lucas-Aragao999/DALF---sistema-de-adocao.git"
   },
   "license": "ISC",
-
   "author": "",
   "type": "commonjs",
   "main": "index.js",
@@ -22,6 +21,7 @@
   "dependencies": {
     "express": "^5.1.0",
     "nodemon": "^3.1.10",
+    "pg": "^8.16.3",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
     "uuidv4": "^6.2.13"
