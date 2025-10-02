@@ -1,28 +1,62 @@
-import { Sequelize } from 'sequelize';
-import AnimalModel from './Animal.js';
-import TutorModel from './Tutor.js';
-import QuestionarioModel from './Questionario.js';
-import PedidoAdocaoModel from './PedidoAdocao.js';
-import DoacaoModel from './Doacao.js';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 
-export const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: './database.sqlite',
-});
+dotenv.config();
 
-export const Animal = AnimalModel(sequelize);
-export const Tutor = TutorModel(sequelize);
-export const Questionario = QuestionarioModel(sequelize);
-export const PedidoAdocao = PedidoAdocaoModel(sequelize);
-export const Doacao = DoacaoModel(sequelize);
+// Configuração do Supabase
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
-// Associações
-// Explicação das associações:
-// - Um Tutor tem um Questionario.
-// - Um Tutor pode ter vários Pedidos de Adoção.
-// - Um Animal pode ter vários Pedidos de Adoção.
-// A tabela PedidosAdocao serve como uma tabela de junção entre Tutores e Animais.
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+    throw new Error('As variáveis SUPABASE_URL e SUPABASE_KEY não estão configuradas no .env');
+}
 
-await sequelize.sync();
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-export default { sequelize, Animal, Tutor, Questionario, PedidoAdocao, Doacao };
+// Funções para interagir com o banco de dados
+
+// Animais
+export async function getAnimais() {
+    const { data, error } = await supabase.from('animais').select('*');
+    if (error) {
+        console.error('Erro ao buscar animais:', error);
+        return [];
+    }
+    return data;
+}
+
+export async function addAnimal(animal) {
+    const { data, error } = await supabase.from('animais').insert([animal]);
+    if (error) {
+        console.error('Erro ao adicionar animal:', error);
+        return null;
+    }
+    return data;
+}
+
+// Tutores
+export async function getTutores() {
+    const { data, error } = await supabase.from('tutores').select('*');
+    if (error) {
+        console.error('Erro ao buscar tutores:', error);
+        return [];
+    }
+    return data;
+}
+
+export async function addTutor(tutor) {
+    const { data, error } = await supabase.from('tutores').insert([tutor]);
+    if (error) {
+        console.error('Erro ao adicionar tutor:', error);
+        return null;
+    }
+    return data;
+}
+
+// Exporte as funções para uso em outros arquivos
+export default {
+    getAnimais,
+    addAnimal,
+    getTutores,
+    addTutor,
+};
