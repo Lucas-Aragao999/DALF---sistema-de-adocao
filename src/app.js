@@ -1,5 +1,5 @@
 const express = require('express')
-
+const port = 3333
 const animaisRoutes = require('./routes/animais.routes')
 const tutoresRoutes = require('./routes/tutores.routes')
 const questionarioRoutes = require('./routes/questionario.routes')
@@ -17,5 +17,9 @@ app.use('/questionario', questionarioRoutes)
 app.use('/adocoes', adocoesRoutes)
 app.use('/doacoes', doacoesRoutes)
 app.use('/admin', adminRoutes)
+
+app.listen(3333, () => {
+    console.log(`🚀 servidor rodando na port ${port} `)
+})
 
 module.exports = app
