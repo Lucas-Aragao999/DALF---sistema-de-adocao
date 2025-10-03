@@ -7,10 +7,13 @@ const adocoesRoutes = require('./routes/adocoes.routes')
 const doacoesRoutes = require('./routes/doacoes.routes')
 const adminRoutes = require('./routes/admin.routes')
 
+const authController = require('./controller/authController')
+
 const app = express()
 app.use(express.json())
 
-// rotas
+app.use('/auth', authController)
+
 app.use('/animais', animaisRoutes)
 app.use('/tutores', tutoresRoutes)
 app.use('/questionario', questionarioRoutes)
