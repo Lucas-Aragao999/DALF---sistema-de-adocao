@@ -1,45 +1,55 @@
+// src/routes/animais.routes.js
 const { Router } = require('express')
-const { v4: uuid } = require('uuid')
-const { animais } = require('../data/database')
+const { supabase } = require('../data/database')
 
 const router = Router()
 
-router.post('/', (req, res) => {
-    const { nome, especie, porte, castrado, vacinado, descricao, foto, adotado } = req.body
+// Criar animal
+router.post('/', async (req, res) => {
+  const { nome, especie, porte, castrado, vacinado, descricao, foto, adotado } = req.body
 
-    const animal = {
-        id: uuid(),
-        nome,
-        especie,
-        porte,
-        castrado,
-        vacinado,
-        descricao,
-        foto,
-        adotado: adotado || false,
-        createdAt: new Date(),
-        updatedAt: new Date()
-    }
+  const { data, error } = await supabase
+    .from('animais')
+    .insert([{
+      nome,
+      especie,
+      porte,
+      castrado,
+      vacinado,
+      descricao,
+      foto,
+      adotado: adotado || false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }])
+    .select()
 
-    animais.push(animal)
-    return res.status(201).json(animal)
+  if (error) return res.status(500).json({ error: error.message })
+  return res.status(201).json(data[0])
 })
 
-router.get('/', (req, res) => {
-    const { nome, especie } = req.query
-    let resultados = animais
+// Buscar animais (com filtros opcionais)
+router.get('/', async (req, res) => {
+  const { nome, especie } = req.query
 
-    if (nome) resultados = resultados.filter(a => a.nome.toLowerCase().includes(nome.toLowerCase()))
-    if (especie) resultados = resultados.filter(a => a.especie.toLowerCase() === especie.toLowerCase())
+  let query = supabase.from('animais').select('*')
 
-    return res.json({ data: resultados, total: resultados.length })
+  if (nome) query = query.ilike('nome', `%${nome}%`)
+  if (especie) query = query.ilike('especie', especie)
+
+  const { data, error } = await query
+  if (error) return res.status(500).json({ error: error.message })
+
+  return res.json({ data, total: data.length })
 })
 
-router.get('/:id', (req, res) => {
-    const { id } = req.params
-    const animal = animais.find(a => a.id === id)
-    if (!animal) return res.status(404).json({ error: 'Animal não encontrado' })
-    return res.json(animal)
+// Buscar animal por ID
+router.get('/:id', async (req, res) => {
+  const { id } = req.params
+  const { data, error } = await supabase.from('animais').select('*').eq('id', id).single()
+
+  if (error) return res.status(404).json({ error: 'Animal não encontrado' })
+  return res.json(data)
 })
 
 module.exports = router

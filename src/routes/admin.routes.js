@@ -1,28 +1,44 @@
+// src/routes/admin.routes.js
 const { Router } = require('express')
-const { animais } = require('../data/database')
+const { supabase } = require('../data/database') // conexão supabase-js
 
 const router = Router()
 
-router.get('/animais', (req, res) => {
-    return res.json(animais)
+// GET - lista todos os animais
+router.get('/animais', async (req, res) => {
+  const { data, error } = await supabase.from('animais').select('*')
+  if (error) return res.status(500).json({ error: error.message })
+  return res.json(data)
 })
 
-router.patch('/animais/:id', (req, res) => {
-    const { id } = req.params
-    const animal = animais.find(a => a.id === id)
-    if (!animal) return res.status(404).json({ error: 'Animal não encontrado' })
+// PATCH - atualiza um animal pelo ID
+router.patch('/animais/:id', async (req, res) => {
+  const { id } = req.params
+  const { data, error } = await supabase
+    .from('animais')
+    .update({ ...req.body, updatedAt: new Date() })
+    .eq('id', id)
+    .select()
 
-    Object.assign(animal, req.body, { updatedAt: new Date() })
-    return res.json({ message: `Animal ${id} atualizado pelo admin!`, animal })
+  if (error) return res.status(500).json({ error: error.message })
+  if (!data.length) return res.status(404).json({ error: 'Animal não encontrado' })
+
+  return res.json({ message: `Animal ${id} atualizado pelo admin!`, animal: data[0] })
 })
 
-router.delete('/animais/:id', (req, res) => {
-    const { id } = req.params
-    const index = animais.findIndex(a => a.id === id)
-    if (index === -1) return res.status(404).json({ error: 'Animal não encontrado' })
+// DELETE - deleta um animal pelo ID
+router.delete('/animais/:id', async (req, res) => {
+  const { id } = req.params
+  const { data, error } = await supabase
+    .from('animais')
+    .delete()
+    .eq('id', id)
+    .select()
 
-    animais.splice(index, 1)
-    return res.json({ message: `Animal ${id} deletado pelo admin!` })
+  if (error) return res.status(500).json({ error: error.message })
+  if (!data.length) return res.status(404).json({ error: 'Animal não encontrado' })
+
+  return res.json({ message: `Animal ${id} deletado pelo admin!` })
 })
 
 module.exports = router

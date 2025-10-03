@@ -1,26 +1,29 @@
+// src/routes/doacoes.routes.js
 const { Router } = require('express')
-const { v4: uuid } = require('uuid')
-const { doacoes } = require('../data/database')
+const { supabase } = require('../data/database')
 
 const router = Router()
 
-router.post('/', (req, res) => {
-    const { nome, email, valor, mensagem, linkPix, qrcode } = req.body
+// Criar doação
+router.post('/', async (req, res) => {
+  const { nome, email, valor, mensagem, linkPix, qrcode } = req.body
 
-    const doacao = {
-        doacao_id: uuid(),
-        nome,
-        email,
-        valor,
-        mensagem,
-        linkPix,
-        qrcode,
-        createdAt: new Date(),
-        updatedAt: new Date()
-    }
+  const { data, error } = await supabase
+    .from('doacoes')
+    .insert([{
+      nome,
+      email,
+      valor,
+      mensagem,
+      linkPix,
+      qrcode,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }])
+    .select()
 
-    doacoes.push(doacao)
-    return res.status(201).json(doacao)
+  if (error) return res.status(500).json({ error: error.message })
+  return res.status(201).json(data[0])
 })
 
 module.exports = router
