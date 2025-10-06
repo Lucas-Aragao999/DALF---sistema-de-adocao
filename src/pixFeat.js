@@ -3,28 +3,24 @@ const { QrCodePix } = require('qrcode-pix');
 const app = express();
 const port = 3000;
 
-// Dados PIX fixos
-const PIX_KEY = 'rodrigues.lds.lfr@gmail.com'; // <- sua chave PIX
-const PIX_NAME = 'DALF';
-const PIX_CITY = 'CAMPINAS';
+// Configuração base do PIX
+const pixBaseData = {
+  version: '01',
+  key: 'rodrigues.lds.lfr@gmail.com', // SUA CHAVE PIX
+  name: 'DALF',
+  city: 'CAMPINAS',
+};
 
-// Função que gera o QR Code Pix
-async function gerarQRCode(valor, txid) {
-  const qrCodePix = QrCodePix({
-    version: '01',
-    key: PIX_KEY,
-    name: PIX_NAME,
-    city: PIX_CITY,
-    value: valor,
-    transactionId: txid,
-  });
-
-  const payload = qrCodePix.payload();
-  const base64 = await qrCodePix.base64();
-  return { payload, base64 };
+// Função para gerar o QR Code PIX
+async function gerarQRCodePix(valor, transactionId) {
+  const dados = { ...pixBaseData, value: valor, transactionId };
+  const qrCodePix = QrCodePix(dados);
+  const rawPixStr = qrCodePix.payload();
+  const qrCodeBase64 = await qrCodePix.base64();
+  return { rawPixStr, qrCodeBase64, txid: transactionId };
 }
 
-// Página principal com botões
+// Rota principal
 app.get('/', (req, res) => {
   const html = `
   <!DOCTYPE html>
@@ -32,117 +28,231 @@ app.get('/', (req, res) => {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doações PIX - DALF</title>
+    <title>Doe via PIX</title>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
       body {
-        background: #f2f5f7;
-        font-family: Arial, sans-serif;
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #e6f4ea 0%, #f8fdf9 100%);
+        color: #1a2e1a;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
         min-height: 100vh;
         margin: 0;
       }
+
       .container {
-        background: #fff;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background: #ffffff;
+        padding: 48px;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0, 80, 40, 0.15);
         text-align: center;
-        width: 400px;
+        max-width: 460px;
+        width: 90%;
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        animation: slideUp 0.9s ease-out;
       }
-      h1 { color: #006400; }
+
+      .container:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 28px rgba(0, 128, 64, 0.25);
+      }
+
+      h1 {
+        font-size: 1.9rem;
+        color: #0f5132;
+        margin-bottom: 12px;
+      }
+
+      h2 {
+        font-size: 1rem;
+        color: #2e7d32;
+        margin-bottom: 22px;
+      }
+
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
       button {
-        margin: 8px;
-        padding: 12px 20px;
-        background: #008000;
-        color: #fff;
+        background: linear-gradient(145deg, #22c55e, #16a34a);
+        color: #ffffff;
         border: none;
-        border-radius: 8px;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
         cursor: pointer;
-        font-size: 16px;
-        transition: background 0.2s;
+        font-size: 1rem;
+        transition: transform 0.2s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
       }
-      button:hover { background: #00a000; }
-      #qr-section {
-        margin-top: 30px;
-        display: none;
+
+      button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: skewX(-25deg);
+        transition: left 0.5s ease;
       }
-      img {
-        margin-top: 10px;
-        border: 1px solid #ccc;
+
+      button:hover::before {
+        left: 130%;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(34, 197, 94, 0.35);
+      }
+
+      button:active {
+        transform: scale(0.97);
+      }
+
+      .input-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin: 20px 0;
+      }
+
+      input[type="number"], input[type="text"] {
+        padding: 10px 14px;
+        border: 2px solid #16a34a;
         border-radius: 8px;
+        outline: none;
+        width: 140px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        color: #14532d;
+        background-color: #f0fdf4;
+      }
+
+      input[type="number"]:focus {
+        border-color: #22c55e;
+        box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+        background-color: #ffffff;
+      }
+
+      #qrImage {
+        display: none;
+        border-radius: 12px;
+        margin: 20px 0;
         width: 260px;
         height: 260px;
+        box-shadow: 0 4px 16px rgba(0, 128, 64, 0.2);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
       }
+
+      #qrImage.visible {
+        display: inline-block;
+        animation: fadeIn 0.6s ease;
+      }
+
       .pix-code {
-        word-break: break-all;
-        background: #f1f1f1;
-        padding: 10px;
-        border-radius: 5px;
-        margin-top: 10px;
+        background-color: #f0fdf4;
+        color: #14532d;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
         text-align: left;
-        font-size: 12px;
+        word-break: break-all;
+        margin-top: 16px;
+        margin-bottom: 16px;
+        border: 1px solid #bbf7d0;
+      }
+
+      #mensagem-copia {
+        font-size: 0.9rem;
+        margin-top: 10px;
+        color: #16a34a;
+        font-weight: 600;
+        display: none;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
       }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>Doe via PIX</h1>
-      <p>Selecione um valor para gerar o QR Code:</p>
-      <div>
+      <h2>Escolha o valor que deseja doar:</h2>
+
+      <div class="buttons">
         <button onclick="gerarPix(5)">R$ 5</button>
         <button onclick="gerarPix(10)">R$ 10</button>
         <button onclick="gerarPix(50)">R$ 50</button>
         <button onclick="gerarPix(100)">R$ 100</button>
       </div>
-      <p>Ou escolha um valor livre:</p>
-      <input id="valorLivre" type="number" placeholder="Ex: 25.50" min="0" step="0.01">
-      <button onclick="gerarPixLivre()">Gerar QR Code</button>
 
-      <div id="qr-section">
-        <h2>QR Code PIX</h2>
-        <img id="qr-img" src="">
-        <div class="pix-code">
-          <p id="pix-code"></p>
-        </div>
-        <button onclick="copiarCodigo()">Copiar Código</button>
-        <p id="msg-copia" style="color:green;display:none;">Código copiado!</p>
+      <h2>Ou escolha um valor livre:</h2>
+      <div class="input-container">
+        <input id="valorLivre" type="number" step="0.01" placeholder="Ex: 25.50">
+        <button onclick="gerarPixLivre()">Gerar QR Code</button>
       </div>
+
+      <h2>Seu QR Code PIX</h2>
+      <p id="txid"></p>
+      <img id="qrImage" alt="QR Code PIX"/>
+
+      <div class="pix-code" id="pixPayload"></div>
+      <button onclick="copiarPix()">Copiar Código</button>
+      <p id="mensagem-copia">Copiado!</p>
     </div>
 
     <script>
       async function gerarPix(valor) {
-        const response = await fetch(\`/gerar?valor=\${valor}\`);
-        const data = await response.json();
-        mostrarPix(data);
+        const txid = 'TX' + Date.now();
+        const resp = await fetch(\`/gerar?valor=\${valor}&txid=\${txid}\`);
+        const data = await resp.json();
+        atualizarPix(data);
       }
 
       async function gerarPixLivre() {
-        const valor = document.getElementById('valorLivre').value;
-        if (!valor || parseFloat(valor) <= 0) {
-          alert('Digite um valor válido!');
+        const valor = parseFloat(document.getElementById('valorLivre').value);
+        if (!valor || valor <= 0) {
+          alert('Informe um valor válido!');
           return;
         }
-        const response = await fetch(\`/gerar?valor=\${valor}\`);
-        const data = await response.json();
-        mostrarPix(data);
+        const txid = 'TX' + Date.now();
+        const resp = await fetch(\`/gerar?valor=\${valor}&txid=\${txid}\`);
+        const data = await resp.json();
+        atualizarPix(data);
       }
 
-      function mostrarPix(data) {
-        document.getElementById('qr-section').style.display = 'block';
-        document.getElementById('qr-img').src = data.qrCodeBase64;
-        document.getElementById('pix-code').innerText = data.payload;
-        document.getElementById('txid').innerText = data.txid;
+      function atualizarPix(data) {
+        document.getElementById('txid').innerText = 'TxID: ' + data.txid;
+        document.getElementById('pixPayload').innerText = data.rawPixStr;
+        const qrImg = document.getElementById('qrImage');
+        qrImg.src = data.qrCodeBase64;
+        qrImg.classList.add('visible');
       }
 
-      function copiarCodigo() {
-        const codigo = document.getElementById('pix-code').innerText;
-        navigator.clipboard.writeText(codigo).then(() => {
-          const msg = document.getElementById('msg-copia');
+      function copiarPix() {
+        const texto = document.getElementById('pixPayload').innerText;
+        navigator.clipboard.writeText(texto).then(() => {
+          const msg = document.getElementById('mensagem-copia');
           msg.style.display = 'block';
-          setTimeout(() => msg.style.display = 'none', 2000);
+          setTimeout(() => (msg.style.display = 'none'), 2000);
         });
       }
     </script>
@@ -152,28 +262,17 @@ app.get('/', (req, res) => {
   res.send(html);
 });
 
-// Endpoint para gerar o QR Code com valor selecionado
+// Rota para gerar o PIX dinâmico
 app.get('/gerar', async (req, res) => {
   try {
-    const valor = parseFloat(req.query.valor);
-    if (isNaN(valor) || valor <= 0) {
-      return res.status(400).json({ erro: 'Valor inválido' });
-    }
-    const txid = 'TX' + Date.now();
-    const { payload, base64 } = await gerarQRCode(valor, txid);
-
-    res.json({
-      qrCodeBase64: base64,
-      payload,
-      txid,
-    });
-  } catch (err) {
-    console.error('Erro ao gerar QR Code PIX:', err);
-    res.status(500).json({ erro: 'Falha ao gerar o QR Code PIX' });
+    const { valor, txid } = req.query;
+    const { rawPixStr, qrCodeBase64, txid: t } = await gerarQRCodePix(parseFloat(valor), txid);
+    res.json({ rawPixStr, qrCodeBase64, txid: t });
+  } catch (e) {
+    res.status(500).send('Erro ao gerar o QR Code');
   }
 });
 
-// Iniciar servidor
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
+    console.log('Servidor rodando em http://localhost:' + port);
 });
