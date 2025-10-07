@@ -1,56 +1,47 @@
-const express = require('express')
-const router = express.Router()
-const bodyParser = require('body-parser')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const { supabase } = require('../data/database') // importa o cliente supabase
-const config = require('../config')
+// src/controller/authController.js
+import { supabase } from '../data/database.js'
+import { v4 as uuid } from 'uuid'
 
-router.use(bodyParser.urlencoded({ extended: false }))
-router.use(bodyParser.json())
+// Lógica de Registro (POST /auth/register)
+const register = async (req, res) => {
+    const { nome_completo, senha, email, cidade, estado, idade, telefone, instagram, facebook } = req.body
 
-// Rota de cadastro
-router.post('/register', async (req, res) => {
-  try {
-    const { nome, email, password } = req.body
-
-    // Validação simples
-    if (!nome || !email || !password) {
-      return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' })
+    const novoTutor = {
+        id: uuid(), nome_completo, senha, email, cidade, estado, idade, telefone, instagram, facebook,
+        created_at: new Date(), updated_at: new Date()
     }
 
-    // Criptografa senha
-    const hashedPassword = bcrypt.hashSync(password, 8)
-
-    // Insere no Supabase
-    const { data, error } = await supabase
-      .from('tutores')
-      .insert([
-        {
-          nome_completo: nome,
-          email,
-          senha: hashedPassword,
-          createdAt: new Date()
-        }
-      ])
-      .select()
+    const { data, error } = await supabase.from('tutores').insert([novoTutor]).select()
 
     if (error) {
-      return res.status(500).json({ error: error.message })
+        if (error.code === '23505') { 
+             return res.status(409).json({ error: 'Email já cadastrado.' })
+        }
+        return res.status(500).json({ error: error.message })
     }
+    return res.status(201).json(data[0])
+}
 
-    const tutor = data[0]
-
+// Lógica de Login (POST /auth/login)
+const login = async (req, res) => {
+    const { email, senha } = req.body
     
-    const token = jwt.sign({ id: tutor.id }, config.secret, {
-      expiresIn: 86400 
-    })
+    const { data, error } = await supabase
+        .from('tutores')
+        .select('*')
+        .eq('email', email)
+        .eq('senha', senha)
+        .single()
+    
+    if (error || !data) {
+        // Assume que qualquer erro aqui é de credenciais inválidas
+        return res.status(401).json({ error: 'Credenciais inválidas' })
+    }
+    
+    return res.json({ message: 'Login realizado!', tutor: data })
+}
 
-    return res.status(201).json({ auth: true, token, tutor })
-  } catch (err) {
-    console.error(err)
-    return res.status(500).json({ error: 'Erro no servidor' })
-  }
-})
-
-module.exports = router
+export default {
+    register,
+    login
+}

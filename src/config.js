@@ -1,3 +1,5 @@
-module.exports = {
+const config = {
     'secret': 'supersecret'
   };
+
+  export default config

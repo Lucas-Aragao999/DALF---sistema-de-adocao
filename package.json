@@ -12,18 +12,26 @@
   },
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js"
-  },
+
+"scripts": {
+  "start": "node -r dotenv/config app.js",
+  "dev": "node -r dotenv/config --watch app.js" 
+},
   "dependencies": {
+    "@supabase/supabase-js": "^2.74.0",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.10",
     "pg": "^8.16.3",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
     "uuidv4": "^6.2.13"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^10.0.0"
   }
 }

@@ -1,6 +1,6 @@
 // src/routes/animais.routes.js
-const { Router } = require('express')
-const { supabase } = require('../data/database')
+import { Router } from 'express'
+import { supabase } from '../data/database.js'
 
 const router = Router()
 
@@ -52,4 +52,4 @@ router.get('/:id', async (req, res) => {
   return res.json(data)
 })
 
-module.exports = router
+export default router

@@ -1,6 +1,6 @@
 // src/routes/doacoes.routes.js
-const { Router } = require('express')
-const { supabase } = require('../data/database')
+import { Router } from 'express'
+import { supabase } from '../data/database.js'
 
 const router = Router()
 
@@ -26,4 +26,4 @@ router.post('/', async (req, res) => {
   return res.status(201).json(data[0])
 })
 
-module.exports = router
+export default router

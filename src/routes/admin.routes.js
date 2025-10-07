@@ -1,6 +1,6 @@
 // src/routes/admin.routes.js
-const { Router } = require('express')
-const { supabase } = require('../data/database') // conexão supabase-js
+import { Router } from 'express'
+import { supabase } from '../data/database.js' // conexão supabase-js
 
 const router = Router()
 
@@ -41,4 +41,4 @@ router.delete('/animais/:id', async (req, res) => {
   return res.json({ message: `Animal ${id} deletado pelo admin!` })
 })
 
-module.exports = router
+export default router
