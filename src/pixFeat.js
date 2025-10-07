@@ -46,6 +46,8 @@ app.get('/', (req, res) => {
       .container {
         background: #ffffff;
         padding: 48px;
+        margin-top: 50px;
+        margin-bottom: 50px;
         border-radius: 20px;
         box-shadow: 0 8px 24px rgba(0, 80, 40, 0.15);
         text-align: center;
