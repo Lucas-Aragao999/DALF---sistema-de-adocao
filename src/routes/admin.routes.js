@@ -1,44 +1,59 @@
 // src/routes/admin.routes.js
 import { Router } from 'express'
-import { supabase } from '../data/database.js' // conexão supabase-js
+import { Animal } from '../data/database.js' // Model Animal
 
 const router = Router()
 
 // GET - lista todos os animais
 router.get('/animais', async (req, res) => {
-  const { data, error } = await supabase.from('animais').select('*')
-  if (error) return res.status(500).json({ error: error.message })
-  return res.json(data)
+    try {
+        const data = await Animal.findAll()
+        return res.json(data)
+    } catch (error) {
+        console.error("Erro ao listar animais (Admin):", error)
+        return res.status(500).json({ error: error.message || 'Erro interno no servidor' })
+    }
 })
 
 // PATCH - atualiza um animal pelo ID
 router.patch('/animais/:id', async (req, res) => {
-  const { id } = req.params
-  const { data, error } = await supabase
-    .from('animais')
-    .update({ ...req.body, updatedAt: new Date() })
-    .eq('id', id)
-    .select()
+    const { id } = req.params
+    
+    try {
+        const [updatedRows, [updatedAnimal]] = await Animal.update(
+            { ...req.body }, 
+            {
+                where: { id: id },
+                returning: true, // Retorna o objeto atualizado
+            }
+        )
 
-  if (error) return res.status(500).json({ error: error.message })
-  if (!data.length) return res.status(404).json({ error: 'Animal não encontrado' })
+        if (updatedRows === 0) return res.status(404).json({ error: 'Animal não encontrado' })
 
-  return res.json({ message: `Animal ${id} atualizado pelo admin!`, animal: data[0] })
+        return res.json({ message: `Animal ${id} atualizado pelo admin!`, animal: updatedAnimal })
+
+    } catch (error) {
+        console.error("Erro ao atualizar animal (Admin):", error)
+        return res.status(500).json({ error: error.message || 'Erro interno no servidor' })
+    }
 })
 
 // DELETE - deleta um animal pelo ID
 router.delete('/animais/:id', async (req, res) => {
-  const { id } = req.params
-  const { data, error } = await supabase
-    .from('animais')
-    .delete()
-    .eq('id', id)
-    .select()
+    const { id } = req.params
+    
+    try {
+        const deletedRows = await Animal.destroy({
+            where: { id: id }
+        })
 
-  if (error) return res.status(500).json({ error: error.message })
-  if (!data.length) return res.status(404).json({ error: 'Animal não encontrado' })
+        if (deletedRows === 0) return res.status(404).json({ error: 'Animal não encontrado' })
 
-  return res.json({ message: `Animal ${id} deletado pelo admin!` })
+        return res.json({ message: `Animal ${id} deletado pelo admin!` })
+    } catch (error) {
+        console.error("Erro ao deletar animal (Admin):", error)
+        return res.status(500).json({ error: error.message || 'Erro interno no servidor' })
+    }
 })
 
 export default router

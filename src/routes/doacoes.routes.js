@@ -1,29 +1,24 @@
 // src/routes/doacoes.routes.js
 import { Router } from 'express'
-import { supabase } from '../data/database.js'
+import { Doacao } from '../data/database.js' // Model Doacao
 
 const router = Router()
 
 // Criar doação
 router.post('/', async (req, res) => {
-  const { nome, email, valor, mensagem, linkPix, qrcode } = req.body
+    const { nome, email, valor, mensagem, linkPix, qrcode } = req.body
 
-  const { data, error } = await supabase
-    .from('doacoes')
-    .insert([{
-      nome,
-      email,
-      valor,
-      mensagem,
-      linkPix,
-      qrcode,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }])
-    .select()
+    try {
+        const novaDoacao = await Doacao.create({
+            nome, email, valor, mensagem, linkPix, qrcode
+        })
 
-  if (error) return res.status(500).json({ error: error.message })
-  return res.status(201).json(data[0])
+        return res.status(201).json(novaDoacao)
+
+    } catch (error) {
+        console.error("Erro ao criar doação:", error)
+        return res.status(500).json({ error: error.message || 'Erro ao processar doação' })
+    }
 })
 
 export default router

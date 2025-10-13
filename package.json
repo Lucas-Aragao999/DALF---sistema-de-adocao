@@ -14,11 +14,10 @@
   "author": "",
   "type": "module",
   "main": "index.js",
-
-"scripts": {
-  "start": "node -r dotenv/config app.js",
-  "dev": "node -r dotenv/config --watch app.js" 
-},
+  "scripts": {
+    "start": "node -r dotenv/config app.js",
+    "dev": "node -r dotenv/config --watch app.js"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.74.0",
     "bcryptjs": "^3.0.2",

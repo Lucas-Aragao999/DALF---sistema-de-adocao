@@ -1,31 +1,37 @@
 // src/routes/questionarios.routes.js
 import { Router } from 'express'
-import { supabase } from '../data/database.js'
+import { Questionario } from '../data/database.js' // Model Questionario
 
 const router = Router()
 
 // Criar questionário
 router.post('/', async (req, res) => {
-  const { data, error } = await supabase
-    .from('questionarios')
-    .insert([{
-      ...req.body,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }])
-    .select()
+    // Note que req.body deve conter o 'tutorId' para a FK
+    try {
+        const novoQuestionario = await Questionario.create(req.body)
 
-  if (error) return res.status(500).json({ error: error.message })
-  return res.status(201).json(data[0])
+        return res.status(201).json(novoQuestionario)
+
+    } catch (error) {
+        console.error("Erro ao criar questionário:", error)
+        return res.status(500).json({ error: error.message || 'Erro ao salvar questionário' })
+    }
 })
 
 // Buscar questionário por ID
 router.get('/:id', async (req, res) => {
-  const { id } = req.params
-  const { data, error } = await supabase.from('questionarios').select('*').eq('id', id).single()
+    const { id } = req.params
 
-  if (error || !data) return res.status(404).json({ error: 'Questionário não encontrado' })
-  return res.json(data)
+    try {
+        const data = await Questionario.findByPk(id)
+
+        if (!data) return res.status(404).json({ error: 'Questionário não encontrado' })
+        return res.json(data)
+
+    } catch (error) {
+        console.error("Erro ao buscar questionário:", error)
+        return res.status(500).json({ error: error.message || 'Erro ao buscar questionário' })
+    }
 })
 
 export default router

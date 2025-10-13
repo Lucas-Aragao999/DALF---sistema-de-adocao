@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
-    const Usuario = sequelize.define('usuario', {
+    const Tutor = sequelize.define('Tutor', {
         id: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
@@ -72,9 +72,9 @@ export default (sequelize) => {
             defaultValue: false
         }
     }, {
-        tableName: 'Usuario',
+        tableName: 'tutores', // Renomeado de 'Usuario' para 'tutores' para consistência
         timestamps: true
     });
 
-    return Usuario;
+    return Tutor;
 };

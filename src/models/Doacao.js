@@ -28,8 +28,10 @@ export default (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false 
         },
-
-        
+        qrcode: { // Adicionado para manter consistência com a rota de doações
+            type: DataTypes.STRING,
+            allowNull: true 
+        }
     }, {
         tableName: 'doacoes',
         timestamps: true

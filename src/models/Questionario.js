@@ -8,6 +8,12 @@ export default (sequelize) => {
             primaryKey: true,
             allowNull: false
         },
+        // Adicionada a chave estrangeira para o Tutor
+        tutorId: { 
+            type: DataTypes.UUID,
+            allowNull: false,
+            unique: true // Garante que cada tutor só tenha um questionário
+        },
         empregado: {
             type: DataTypes.BOOLEAN,
             allowNull: true
@@ -41,7 +47,7 @@ export default (sequelize) => {
             set(value) {
                 this.setDataValue('idades_criancas', JSON.stringify(value));
             },
-            allowNull: true // Assumindo que pode ser nulo se não houver crianças.
+            allowNull: true
         },
         residencia_tipo: {
             type: DataTypes.STRING,

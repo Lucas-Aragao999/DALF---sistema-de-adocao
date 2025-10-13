@@ -1,44 +1,57 @@
 // src/controller/authController.js
-import { supabase } from '../data/database.js'
+import { Tutor } from '../data/database.js' // Model Tutor
 import { v4 as uuid } from 'uuid'
+import { Op } from 'sequelize' // Necessário para operadores de busca
 
 // Lógica de Registro (POST /auth/register)
 const register = async (req, res) => {
     const { nome_completo, senha, email, cidade, estado, idade, telefone, instagram, facebook } = req.body
 
-    const novoTutor = {
-        id: uuid(), nome_completo, senha, email, cidade, estado, idade, telefone, instagram, facebook,
-        created_at: new Date(), updated_at: new Date()
-    }
+    try {
+        // Sequilize cuidará do created_at e updated_at
+        const novoTutor = await Tutor.create({
+            id: uuid(), nome_completo, senha, email, cidade, estado, idade, telefone, instagram, facebook,
+        })
 
-    const { data, error } = await supabase.from('tutores').insert([novoTutor]).select()
+        const tutorData = novoTutor.get({ plain: true })
+        delete tutorData.senha // Não retorna a senha
 
-    if (error) {
-        if (error.code === '23505') { 
-             return res.status(409).json({ error: 'Email já cadastrado.' })
+        return res.status(201).json(tutorData)
+
+    } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') { 
+            return res.status(409).json({ error: 'Email ou outro campo único já cadastrado.' })
         }
-        return res.status(500).json({ error: error.message })
+        console.error("Erro no registro:", error);
+        return res.status(500).json({ error: error.message || 'Erro interno no servidor' })
     }
-    return res.status(201).json(data[0])
 }
 
 // Lógica de Login (POST /auth/login)
 const login = async (req, res) => {
     const { email, senha } = req.body
     
-    const { data, error } = await supabase
-        .from('tutores')
-        .select('*')
-        .eq('email', email)
-        .eq('senha', senha)
-        .single()
-    
-    if (error || !data) {
-        // Assume que qualquer erro aqui é de credenciais inválidas
-        return res.status(401).json({ error: 'Credenciais inválidas' })
+    try {
+        const tutor = await Tutor.findOne({
+            where: {
+                email: email,
+                senha: senha 
+            }
+        })
+        
+        if (!tutor) {
+            return res.status(401).json({ error: 'Credenciais inválidas' })
+        }
+        
+        const tutorData = tutor.get({ plain: true })
+        delete tutorData.senha // Não retorna a senha
+
+        return res.json({ message: 'Login realizado!', tutor: tutorData })
+
+    } catch (error) {
+        console.error("Erro no login:", error);
+        return res.status(500).json({ error: error.message || 'Erro interno no servidor' })
     }
-    
-    return res.json({ message: 'Login realizado!', tutor: data })
 }
 
 export default {

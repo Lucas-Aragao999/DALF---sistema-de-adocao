@@ -17,11 +17,11 @@ export default (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: true
         },
-        tutorId: {
+        tutorId: { // Chave estrangeira para o Tutor (Usuário)
             type: DataTypes.UUID,
             allowNull: false
         },
-        animalId: {
+        animalId: { // Chave estrangeira para o Animal
             type: DataTypes.UUID,
             allowNull: false
         }
